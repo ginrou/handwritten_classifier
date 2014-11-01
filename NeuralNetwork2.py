@@ -11,28 +11,24 @@ def sigmoid_a(array):
 
 class NeuralNetwork:
     def __init__(self, in_size, hidden_size, out_size):
-        self.hidden_weight = 0.1 * numpy.random.random_sample((hidden_size, in_size+1)) - 0.05
-        self.output_weight = 0.1 * numpy.random.random_sample((out_size, hidden_size+1)) - 0.05
+        self.hidden_weight = 0.1 * (numpy.random.random_sample((hidden_size, in_size+1)) - 0.5)
+        self.output_weight = 0.1 * (numpy.random.random_sample((out_size, hidden_size+1)) - 0.5)
 
-    def fit(self, in_sig, out_sig, update_ratio = 0.1):
-        z_out, y_out = self.fire(in_sig)
+    def fit(self, x, t, update_ratio = 0.1):
+        z, y = self.fire(x)
+        dy = y * ( 1 - y )
+        dz = (self.output_weight.T.dot(dy))[1:] * z * ( 1- z )
 
-        delta_y = y_out * ( 1 - y_out )
-        tmp = (self.output_weight.T.dot(delta_y))[1:]
-        delta_z = tmp * z_out * ( 1- z_out )
+        output_input = numpy.r_[ numpy.array([1]), z ]
+        self.output_weight -= update_ratio * ( dy * ( y - t ) ).reshape(-1,1) * output_input
 
-        output_input = numpy.r_[ numpy.array([1]), z_out ]
-        self.output_weight -= update_ratio * output_input * (delta_y*(y_out-out_sig)).reshape(-1,1)
-
-        hidden_input = numpy.r_[ numpy.array([1]), in_sig ]
-        self.hidden_weight -= update_ratio * delta_z.reshape(-1,1) * hidden_input
+        hidden_input = numpy.r_[ numpy.array([1]), x ]
+        self.hidden_weight -= update_ratio * dz.reshape(-1,1) * hidden_input
 
     def fire(self, x):
-        z_in = self.hidden_weight.dot(numpy.r_[ numpy.array([1]), x ])
-        z_out = sigmoid_a(z_in)
-        y_in = self.output_weight.dot(numpy.r_[ numpy.array([1]), z_out ])
-        y_out = sigmoid_a(y_in)
-        return (z_out, y_out)
+        z = sigmoid_a(self.hidden_weight.dot(numpy.r_[ numpy.array([1]), x ]))
+        y = sigmoid_a(self.output_weight.dot(numpy.r_[ numpy.array([1]), z ]))
+        return (z, y)
 
     def predicate(self, x):
         z, y = self.fire(x)

@@ -22,8 +22,10 @@ def main():
             train_data = TrainData.read_from_file(os.path.join(data_dir, file))
             x = train_data.image.flatten() / 256.0
             y = train_data.list_formatted_number()
+
             ## update
             nn.fit(x, y)
+
             ## inspect
             t = int(train_data.number)
             py = int(nn.predicate(x))
