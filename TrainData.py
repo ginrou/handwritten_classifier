@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import numpy, sys, os, pprint, re
+import numpy, sys, os, pprint, gzip, pickle
 from scipy import misc, ndimage
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -23,3 +23,27 @@ class TrainData:
         num = re.search('(\d{5})-(\d{1})', path).group(2)
         img = misc.imread(path, 1)
         return TrainData(img, num)
+
+
+    @classmethod
+    def read(cls, filepath, dataset = "training"):
+        """
+        MNSIT data set reader.
+        returns (images, labels, length)
+        """
+        f = gzip.open(sys.argv[1], 'rb')
+        train, valid, test = pickle.load(f, encoding='latin1')
+        f.close()
+
+        if dataset == "training":
+            return (train[0], train[1], train[0].shape[0])
+        elif dataset == "valid":
+            return (valid[0], valid[1], valid[0].shape[0])
+        else:
+            return (test[0], test[1], test[0].shape[0])
+
+    @classmethod
+    def to_formatted_array(cls, number):
+        ret = numpy.zeros(10)
+        ret[number] = 1
+        return ret

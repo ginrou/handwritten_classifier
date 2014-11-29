@@ -33,3 +33,11 @@ class NeuralNetwork:
     def predicate(self, x):
         z, y = self.fire(x)
         return numpy.array(y).argmax()
+
+    def save(self, filepath):
+        numpy.savez(filepath, hidden = self.hidden_weight, output = self.output_weight)
+
+    def load(self, filepath):
+        npzfiles = numpy.load(filepath)
+        self.hidden_weight = npzfiles['hidden']
+        self.output_weight = npzfiles['output']
